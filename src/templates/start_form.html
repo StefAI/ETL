@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ETL</title>
+    <style>
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 3px solid #ddd;
+        border-top-color: #333;
+        border-radius: 50%;
+        display: inline-block;
+        animation: spin 0.8s linear infinite;
+        vertical-align: middle;
+        margin-right: 8px;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .processing {
+        display: none;
+        margin-top: 12px;
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        background: #fafafa;
+        max-width: 520px;
+      }
+    </style>
+</head>
+<body>
+<h1 style="background-color:yellow;">Загрузите документ для обработки</h1>
+            <p>
+            <form id="uploadForm" action="/process" enctype="multipart/form-data" method="post">
+            <input id="fileInput" name="file" type="file">
+            <input id="submitBtn" type="submit" value="Отправить">
+            </form>
+            <p id="fileError" style="color: red; display: none;">Сначала выберите файл</p>
+            <div id="processing" class="processing" aria-live="polite">
+              <span class="spinner" aria-hidden="true"></span>
+              <span>Идёт обработка…</span>
+              <span id="timer" style="margin-left: 8px; color: #555;">00:00</span>
+            </div>
+            <script>
+              (function () {
+                var form = document.getElementById("uploadForm");
+                var fileInput = document.getElementById("fileInput");
+                var fileError = document.getElementById("fileError");
+                var processing = document.getElementById("processing");
+                var submitBtn = document.getElementById("submitBtn");
+                var timerEl = document.getElementById("timer");
+                var timerId = null;
+
+                function pad2(n) { return (n < 10 ? "0" : "") + n; }
+                function formatMMSS(totalSeconds) {
+                  var m = Math.floor(totalSeconds / 60);
+                  var s = totalSeconds % 60;
+                  return pad2(m) + ":" + pad2(s);
+                }
+                function stopTimer() {
+                  if (timerId !== null) {
+                    clearInterval(timerId);
+                    timerId = null;
+                  }
+                }
+
+                form.addEventListener("submit", function (e) {
+                  var hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+                  if (!hasFile) {
+                    e.preventDefault();
+                    fileError.style.display = "block";
+                    if (processing) processing.style.display = "none";
+                    if (submitBtn) submitBtn.disabled = false;
+                    stopTimer();
+                    fileInput.focus();
+                  } else {
+                    fileError.style.display = "none";
+                    if (submitBtn) submitBtn.disabled = true;
+                    if (processing) processing.style.display = "block";
+                    form.style.display = "none";
+
+                    if (timerEl) timerEl.textContent = "00:00";
+                    stopTimer();
+                    var startedAt = Date.now();
+                    timerId = setInterval(function () {
+                      var elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+                      if (timerEl) timerEl.textContent = formatMMSS(elapsedSeconds);
+                    }, 1000);
+                  }
+                });
+              })();
+            </script>
+</body>
+</html>
+
+

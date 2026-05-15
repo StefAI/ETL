@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Результаты обработки</title>
+    <style>
+        .json-tree { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size: 13px; }
+        .json-tree details { margin-left: 16px; }
+        .json-tree summary { cursor: pointer; }
+        .json-tree .kv { margin-left: 16px; white-space: pre-wrap; word-break: break-word; }
+        .json-tree .key { color: #0b5394; }
+        .json-tree .type { color: #666; }
+    </style>
+</head>
+<body>
+                <h2>Результат обработки - {{res}}</h2>
+                <p>
+                <h2 style="background-color:lime;">{{message}}</h2>
+
+                <p>
+                <h3>JSON-представление результата</h3>
+                {% macro render_json(value, name=None) -%}
+                    {%- if value is mapping -%}
+                        <details open>
+                            <summary>
+                                {%- if name is not none -%}<span class="key">{{ name }}</span>: {%- endif -%}
+                                <span class="type">object ({{ value|length }})</span>
+                            </summary>
+                            {%- for k, v in value.items() -%}
+                                {{ render_json(v, k) }}
+                            {%- endfor -%}
+                        </details>
+                    {%- elif value is sequence and value is not string -%}
+                        <details open>
+                            <summary>
+                                {%- if name is not none -%}<span class="key">{{ name }}</span>: {%- endif -%}
+                                <span class="type">array ({{ value|length }})</span>
+                            </summary>
+                            {%- for item in value -%}
+                                {{ render_json(item, loop.index0) }}
+                            {%- endfor -%}
+                        </details>
+                    {%- else -%}
+                        <div class="kv">
+                            {%- if name is not none -%}<span class="key">{{ name }}</span>: {%- endif -%}
+                            {{ value | tojson }}
+                        </div>
+                    {%- endif -%}
+                {%- endmacro %}
+
+                <div class="json-tree">
+                    {% if json is none %}
+                        <div class="kv"><span class="type">no data</span></div>
+                    {% else %}
+                        {{ render_json(json) }}
+                    {% endif %}
+                </div>
+                <button onclick="history.back()">Назад</button>
+</body>
+</html>
