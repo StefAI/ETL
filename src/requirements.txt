@@ -1,8 +1,0 @@
-uvicorn==0.22.0
-docling==2.92.0
-fastapi==0.100.0
-python-multipart==0.0.6
-anyio==3.7.1
-docling_parse
-striprtf>=0.0.26
-jinja2>=3.1.0
